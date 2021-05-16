@@ -17,7 +17,7 @@
                     <span style="font-size: 40px; position: fixed; top: 8px; left: calc(45% + 98px); background: aliceblue; width: calc(45% - 10px); padding: 10px; border-radius: 5px 5px 0 0;">Sites</span>
                     <br><br><br><br>
                     <% sites.forEach(site => { %>
-                        <span><%= site.domain %> => <%= site.ip %>:<%= site.port %> By User <%= site.user %></span>
+                        <span><%= site.domain %> => <%= site.ip %>:<%= site.port %> By User <%= site.user %></span><br>
                     <% }) %>
                     <br><br><br>
                     <form method="POST" action="/addSite">
