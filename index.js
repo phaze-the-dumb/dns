@@ -9,7 +9,7 @@ const cookieParser = require('cookie-parser')
 
 const server = require('./data/server.json');
 const users = require('./data/users.json');
-const domains = require('./data/domains.json');
+let domains = require('./data/domains.json');
 
 if(!server.adminPass){
     server.adminPass = CryptoJS.SHA3('Admin').toString();
