@@ -1,0 +1,24 @@
+body{
+    background:#27292C;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.box{
+    background: white;
+    width: 90%;
+    height: calc(100% - 20px);
+    border-radius: 5px;
+    overflow: auto;
+    padding: 10px;
+}
+
+.column {
+    float: left;
+    width: 50%;
+}
+  
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
