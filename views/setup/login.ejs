@@ -1,0 +1,92 @@
+<html>
+    <head>
+        <title>ItzWiresDev#6193 Panel Login</title>
+
+        <style>
+            body{
+                background: #29366b;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            .center{
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            .login{
+                padding: 20px;
+                background: #000e30;
+                border-radius: 20px;
+                color: white;
+                text-align: center;
+                width: 50%;
+            }
+
+            .text{
+                width: calc(100% - 20px);
+                margin: 10px;
+                font-size: 15px;
+                padding: 5px 10px;
+                color: white;
+                background: #000105;
+                border: white 1px solid;
+                border-radius: 12px;
+                outline: none;
+            }
+
+            .submit{
+                width: calc(100% - 20px);
+                margin: 10px;
+                font-size: 15px;
+                padding: 5px 7px;
+                color: white;
+                background: #000105;
+                border: white 1px solid;
+                border-radius: 12px;
+                outline: none;
+            }
+
+            #changeText{
+                transition: 0.25s;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="center login">
+            <h1 id="changeText">CPanel+</h1>
+            <h2>Login</h2>
+
+            <form method="POST" action="/login">
+                Username<br>
+                <input type="text" class="text" name="name">
+                Password<br>
+                <input type="password" class="text" name="pass">
+                <input type="submit" class="submit">
+            </form>
+        </div>
+    </body>
+
+    <script>
+        let text = document.getElementById('changeText')
+
+        setInterval(function(){
+            text.style.opacity = 0
+
+            setTimeout(function(){
+                text.innerHTML = 'ItzWiresDev#6193'
+                text.style.opacity = 1
+            }, 250)
+
+            setTimeout(function(){
+                text.style.opacity = 0
+
+                setTimeout(function(){
+                    text.innerHTML = 'CPanel+'
+                    text.style.opacity = 1
+                }, 250)
+            }, 1000)
+        }, 2000)
+    </script>
+</html>

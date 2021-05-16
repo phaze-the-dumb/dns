@@ -1,0 +1,42 @@
+<html>
+    <head>
+        <title>CPanel+</title>
+        <link rel="stylesheet" href="../panel/main.css" type="text/css">
+    </head>
+    <body>
+        <div class="row">
+            <div class="column">
+                <div id="logs" class="box">
+                    <span style="font-size: 40px; position: fixed; top: 8px; left: 8px; background: aliceblue; width: calc(45% - 10px); padding: 10px; border-radius: 5px 5px 0 0;">Logs</span>
+                    <br><br><br><br>
+                    <%- logs.split('\n').join('<br>') %>
+                </div>
+            </div>
+            <div class="column">
+                <div id="sites" class="box">
+                    <span style="font-size: 40px; position: fixed; top: 8px; left: calc(45% + 98px); background: aliceblue; width: calc(45% - 10px); padding: 10px; border-radius: 5px 5px 0 0;">Sites</span>
+                    <br><br><br><br>
+                    <% sites.forEach(site => { %>
+                        <span><%= site.domain %> => <%= site.ip %>:<%= site.port %> By User <%= site.user %></span>
+                    <% }) %>
+                    <br><br><br>
+                    <form method="POST" action="/addSite">
+                        Domain
+                        <input type="text" name="domain">
+                        IP
+                        <input type="text" name="ip">
+                        Port
+                        <input type="number" name="port">
+                        <input type="submit" value="add">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
+
+<script>
+    let logs = document.getElementById('logs')
+
+    logs.scrollBy(0, 1000000)
+</script>
