@@ -17,7 +17,7 @@
                     <span style="font-size: 40px; position: fixed; top: 8px; left: calc(45% + 98px); background: aliceblue; width: calc(45% - 10px); padding: 10px; border-radius: 5px 5px 0 0;">Sites</span>
                     <br><br><br><br>
                     <% sites.forEach(site => { %>
-                        <span><%= site.domain %> => <%= site.ip %>:<%= site.port %> By User <%= site.user %></span><br>
+                        <span><%= site.domain %> => <%= site.ip %>:<%= site.port %> By User <%= site.user %> </span><button onclick="deleteDNS('<%= site.domain %>');">Delete</button>
                     <% }) %>
                     <br><br><br>
                     <form method="POST" action="/addSite">
@@ -39,4 +39,26 @@
     let logs = document.getElementById('logs')
 
     logs.scrollBy(0, 1000000)
+
+    function deleteDNS(domain){
+        const url = '/dns/delete';
+
+        const data = {
+            domain: domain
+        };
+
+        const options = {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }
+
+        fetch(url, options)
+            .then(res => res.json())
+            .then(res => {
+                window.location = '/panel/home'
+            });
+    }
 </script>
