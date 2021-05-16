@@ -255,6 +255,30 @@ panel.get('/panel/home', async function(req, res){
     }
 })
 
+panel.post('/dns/delete', async function(req, res){
+    let user = users.find(x => x.username === req.cookies._name)
+    if(!user){
+        res.render(__dirname + '/views/panel/login.ejs', {
+            error: true,
+        });
+        return;
+    }
+
+    if(user.password === req.cookies._pass){
+        domains = domains.filter(x => x.domain != req.body.domain)
+
+        fs.writeFile("./data/domains.json", JSON.stringify(domains), (err) => {
+            if(err)return console.log(err);
+        });
+
+        res.send('ok')
+    } else{
+        res.render(__dirname + '/views/panel/login.ejs', {
+            error: true,
+        });
+    }
+})
+
 panel.post('/addSite', async function(req, res){
     let user = users.find(x => x.username === req.cookies._name)
     if(!user){
