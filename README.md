@@ -12,4 +12,4 @@ Default login Name: `Admin`, Pass: `Admin`
 
 On port 2052 you have user accounts, logs and domains
 
-On port 80 thats where the porxy is... its quite simple
+On port 80 thats where the proxy is... its quite simple
