@@ -1,1 +1,8 @@
 
+[25-02-2022 16:7:35] INFO ::ffff:127.0.0.1 visited localhost/
+[25-02-2022 16:7:55] INFO ::ffff:127.0.0.1 visited localhost/
+[25-02-2022 16:7:55] INFO ::ffff:127.0.0.1 visited localhost/favicon.ico
+[25-02-2022 16:45:50] WARN ::ffff:127.0.0.1 went to login page
+[25-02-2022 16:47:53] WARN ::ffff:127.0.0.1 went to login page
+[25-02-2022 17:19:21] WARN ::ffff:127.0.0.1 went to login page
+[25-02-2022 17:19:22] WARN ::ffff:127.0.0.1 went to login page

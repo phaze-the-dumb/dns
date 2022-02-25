@@ -5,14 +5,17 @@ body{
 
 .box{
     background: white;
-    width: 90%;
-    height: calc(100% - 20px);
+    width: 100%;
     border-radius: 5px;
     overflow: auto;
     padding: 10px;
 }
 
-.column {
+.rows{
+    display: flex;
+}
+
+/* .column {
     float: left;
     width: 50%;
 }
@@ -21,4 +24,4 @@ body{
     content: "";
     display: table;
     clear: both;
-}
+} */

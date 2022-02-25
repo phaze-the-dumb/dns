@@ -3,13 +3,14 @@ const fetch = require('node-fetch');
 const express = require('express');
 const fs = require('fs');
 const CryptoJS = require('crypto-js');
-const ip = require("ip");
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser')
 
 const server = require('./data/server.json');
 const users = require('./data/users.json');
 let domains = require('./data/domains.json');
+
+let tracking = [];
 
 if(!server.adminPass){
     server.adminPass = CryptoJS.SHA3('Admin').toString();
@@ -59,7 +60,7 @@ async function onRequest(req, res){
     if(req.headers['cf-connecting-ip']){
         ip2 = req.headers['cf-connecting-ip']
     } else{
-        ip2 = ip.address()
+        ip2 = req.headers['x-forwarded-for'] || req.socket.remoteAddress
     }
 
     let url = req.url
@@ -93,7 +94,7 @@ async function proxy(client_req, client_res) {
     if(client_req.headers['cf-connecting-ip']){
         ip2 = client_req.headers['cf-connecting-ip']
     } else{
-        ip2 = ip.address()
+        ip2 = client_req.headers['x-forwarded-for'] || client_req.socket.remoteAddress
     }
 
     let date_ob = new Date();
@@ -106,13 +107,8 @@ async function proxy(client_req, client_res) {
 
     let domain = domains.find(x => x.domain === client_req.headers.host)
     if(!domain){
-        options = {
-            hostname: 'localhost',
-            port: 2086,
-            path: '/404',
-            method: client_req.method,
-            headers: client_req.headers
-        };
+        client_res.writeHead(200, {'Content-Type': 'text/html'});
+        client_res.end(fs.readFileSync('templates/404.html'));
     } else{
         fs.readFile('./data/logs/'+domain.user+'.txt', 'utf8', function(err, data){
             if(err)return;
@@ -131,62 +127,51 @@ async function proxy(client_req, client_res) {
             method: client_req.method,
             headers: client_req.headers
         };
-    }
 
-    var proxy = http.request(options, function (res) {
-        client_res.writeHead(res.statusCode, res.headers)
-        res.pipe(client_res, {
-            end: true
-        });
-    });
-
-    proxy.on('error', function(err1){
-        fs.readFile('./data/logs.txt', 'utf8', function(err, data){
-            if(err)return;
-    
-            let log = '['+date + "-" + month + "-" + year + " " + hours + ":" + minutes + ":" + seconds+'] ERROR ' + err1 + '\n'
-    
-            fs.writeFile("./data/logs.txt", data + log, (err) => {
-                if(err)return console.log(err);
-            });
-        }); 
-
-        fs.readFile('./data/logs/'+domain.user+'.txt', 'utf8', function(err, data){
-            if(err)return;
-    
-            let log = '['+date + "-" + month + "-" + year + " " + hours + ":" + minutes + ":" + seconds+'] ERROR ' + err1 + '\n'
-    
-            fs.writeFile('./data/logs/'+domain.user+'.txt', data + log, (err) => {
-                if(err)return console.log(err);
-            });
-        });
-
-        options = {
-            hostname: 'localhost',
-            port: 2086,
-            path: '/500',
-            method: client_req.method,
-            headers: client_req.headers
-        };
-
-        var proxy2 = http.request(options, function (res) {
+        var proxy = http.request(options, function (res) {
             client_res.writeHead(res.statusCode, res.headers)
             res.pipe(client_res, {
                 end: true
             });
         });
-
-        client_req.pipe(proxy2, {
+    
+        proxy.on('error', function(err1){
+            fs.readFile('./data/logs.txt', 'utf8', function(err, data){
+                if(err)return;
+        
+                let log = '['+date + "-" + month + "-" + year + " " + hours + ":" + minutes + ":" + seconds+'] ERROR ' + err1 + '\n'
+        
+                fs.writeFile("./data/logs.txt", data + log, (err) => {
+                    if(err)return console.log(err);
+                });
+            }); 
+    
+            fs.readFile('./data/logs/'+domain.user+'.txt', 'utf8', function(err, data){
+                if(err)return;
+        
+                let log = '['+date + "-" + month + "-" + year + " " + hours + ":" + minutes + ":" + seconds+'] ERROR ' + err1 + '\n'
+        
+                fs.writeFile('./data/logs/'+domain.user+'.txt', data + log, (err) => {
+                    if(err)return console.log(err);
+                });
+            });
+    
+            client_res.writeHead(200, {'Content-Type': 'text/html'});
+            client_res.end(fs.readFileSync('templates/500.html'));
+        })
+    
+        client_req.pipe(proxy, {
             end: true
         })
-    })
-
-    client_req.pipe(proxy, {
-        end: true
-    })
+    }
 }
 
 const panel = express();
+
+panel.get('/js/a.js', (req, res) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.sendFile(__dirname + '/public/a.js');
+})
 
 panel.use(express.static("public"));
 panel.use(bodyParser.urlencoded({ extended: true }));
@@ -200,7 +185,7 @@ panel.get('/', async function(req, res){
     if(req.headers['cf-connecting-ip']){
         ip2 = req.headers['cf-connecting-ip']
     } else{
-        ip2 = ip.address()
+        ip2 = req.headers['x-forwarded-for'] || req.socket.remoteAddress
     }
 
     let date_ob = new Date();
@@ -230,6 +215,24 @@ panel.get('/panel', async function(req, res){
     res.redirect('/panel/home')
 })
 
+panel.get('/api/v1/a', (req, res) => {
+    if(!req.cookies._trackID){
+        let id = require('uuid').v1() + require('uuid').v4();
+        tracking.push(id);
+        res.cookie('_trackID', id, { maxAge: 31557600000 });
+    }
+
+    let track = tracking.find(x => x.id === req.cookies._trackID);
+    if(!track){
+        let id = require('uuid').v1() + require('uuid').v4();
+        tracking.push(id);
+        res.cookie('_trackID', id, { maxAge: 31557600000 });
+        track = tracking.find(x => x.id === req.cookies._trackID);
+    }
+
+    res.send('Setup Tracking With Server ID: '+track)
+})
+
 panel.get('/panel/home', async function(req, res){
     let user = users.find(x => x.username === req.cookies._name)
     if(!user){
@@ -245,7 +248,8 @@ panel.get('/panel/home', async function(req, res){
 
             res.render(__dirname + '/views/panel/panel.ejs', {
                 logs,
-                sites
+                sites,
+                tracking
             })
         })
     } else{
@@ -441,25 +445,25 @@ setup.listen(2090)
 
 //error pages
 
-const errors = express();
+// const errors = express();
 
-errors.get('/404', function(req, res){
-    fs.readFile('./templates/404.html', 'utf8', function(err, data){
-        res.status(404).send(data)
-    })
-})
+// errors.get('/404', function(req, res){
+//     fs.readFile('./templates/404.html', 'utf8', function(err, data){
+//         res.status(404).send(data)
+//     })
+// })
 
-errors.get('/500', function(req, res){
-    fs.readFile('./templates/500.html', 'utf8', function(err, data){
-        res.status(500).send(data)
-    })
-})
+// errors.get('/500', function(req, res){
+//     fs.readFile('./templates/500.html', 'utf8', function(err, data){
+//         res.status(500).send(data)
+//     })
+// })
 
-errors.get('/ban', function(req, res){
-    res.status(401).send('You have been banned from this site')
-})
+// errors.get('/ban', function(req, res){
+//     res.status(401).send('You have been banned from this site')
+// })
 
-errors.listen(2086)
+// errors.listen(2086)
 
 function createID() {
     var characters = [
