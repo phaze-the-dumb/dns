@@ -1,5 +1,5 @@
 # dns
-A dns server panel thingy i took the name from cpanel... its not cpanel... lmao
+A dns server panel thingy i made...
 
 Clone the repo `git clone https://github.com/wiresboy-exe/dns`
 
