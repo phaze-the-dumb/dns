@@ -20,7 +20,7 @@ if(!server.adminPass){
 https.createServer({
     key: fs.readFileSync('keys/priv.key'),
     cert: fs.readFileSync('keys/cert.key')
-}, onRequest).listen(443);
+}, onRequest).listen(443, () => console.log('Proxy Server Started'));
 
 function getLogs(user, callback){
     fs.readFile('./data/logs/'+user+'.txt', 'utf8', function(err, data){
@@ -31,6 +31,7 @@ function getLogs(user, callback){
 }
 
 async function onRequest(req, res){
+    console.log('Proxy Request: '+req.method+' '+req.url)
     let ip2 = ''
 
     if(req.headers['cf-connecting-ip']){
@@ -273,8 +274,7 @@ panel.post('/login', async function(req, res){
     }
 })
 
-panel.listen(2052)
-
+panel.listen(2052, () => console.log('Panel Started'));
 
 const setup = express();
 
@@ -361,7 +361,7 @@ setup.post('/login', async function(req, res){
     }
 })
 
-setup.listen(2090)
+setup.listen(2090, () => console.log('Setup Panel Started'))
 
 function createID() {
     var characters = [
