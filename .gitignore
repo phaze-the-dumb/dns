@@ -1,1 +1,3 @@
 node_modules/
+data/server.json
+keys/*.key

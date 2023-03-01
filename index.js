@@ -1,5 +1,4 @@
-const http = require('http');
-const fetch = require('node-fetch');
+const https = require('https');
 const express = require('express');
 const fs = require('fs');
 const CryptoJS = require('crypto-js');
@@ -10,8 +9,6 @@ const server = require('./data/server.json');
 const users = require('./data/users.json');
 let domains = require('./data/domains.json');
 
-let tracking = [];
-
 if(!server.adminPass){
     server.adminPass = CryptoJS.SHA3('Admin').toString();
 
@@ -20,31 +17,7 @@ if(!server.adminPass){
     });
 }
 
-http.createServer(onRequest).listen(80);
-
-function clearLogs(){
-    fs.writeFile("./data/logs.txt", '', (err) => {
-        if(err)return console.log(err);
-    });
-
-    fs.readdir(__dirname + '/data/logs', (err, files) => {
-        if (err)
-          console.log(err);
-        else {
-            files.forEach(file => {
-                fs.writeFile("./data/logs/"+file, '', (err) => {
-                    if(err)return console.log(err);
-                });            
-            })
-        }
-    })
-}
-
-function clearUserLogs(id){
-    fs.writeFile("./data/logs/"+id+".txt", '', (err) => {
-        if(err)return console.log(err);
-    });
-}
+https.createServer({ key: fs.readFileSync('keys/priv.key'), cert: fs.readFileSync('keys/cert.key') }, onRequest).listen(80);
 
 function getLogs(user, callback){
     fs.readFile('./data/logs/'+user+'.txt', 'utf8', function(err, data){
@@ -168,11 +141,6 @@ async function proxy(client_req, client_res) {
 
 const panel = express();
 
-panel.get('/js/a.js', (req, res) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.sendFile(__dirname + '/public/a.js');
-})
-
 panel.use(express.static("public"));
 panel.use(bodyParser.urlencoded({ extended: true }));
 panel.use(cookieParser());
@@ -215,24 +183,6 @@ panel.get('/panel', async function(req, res){
     res.redirect('/panel/home')
 })
 
-panel.get('/api/v1/a', (req, res) => {
-    if(!req.cookies._trackID){
-        let id = require('uuid').v1() + require('uuid').v4();
-        tracking.push(id);
-        res.cookie('_trackID', id, { maxAge: 31557600000 });
-    }
-
-    let track = tracking.find(x => x.id === req.cookies._trackID);
-    if(!track){
-        let id = require('uuid').v1() + require('uuid').v4();
-        tracking.push(id);
-        res.cookie('_trackID', id, { maxAge: 31557600000 });
-        track = tracking.find(x => x.id === req.cookies._trackID);
-    }
-
-    res.send('Setup Tracking With Server ID: '+track)
-})
-
 panel.get('/panel/home', async function(req, res){
     let user = users.find(x => x.username === req.cookies._name)
     if(!user){
@@ -248,8 +198,7 @@ panel.get('/panel/home', async function(req, res){
 
             res.render(__dirname + '/views/panel/panel.ejs', {
                 logs,
-                sites,
-                tracking
+                sites
             })
         })
     } else{
@@ -441,29 +390,6 @@ setup.post('/login', async function(req, res){
 })
 
 setup.listen(2090)
-
-
-//error pages
-
-// const errors = express();
-
-// errors.get('/404', function(req, res){
-//     fs.readFile('./templates/404.html', 'utf8', function(err, data){
-//         res.status(404).send(data)
-//     })
-// })
-
-// errors.get('/500', function(req, res){
-//     fs.readFile('./templates/500.html', 'utf8', function(err, data){
-//         res.status(500).send(data)
-//     })
-// })
-
-// errors.get('/ban', function(req, res){
-//     res.status(401).send('You have been banned from this site')
-// })
-
-// errors.listen(2086)
 
 function createID() {
     var characters = [
