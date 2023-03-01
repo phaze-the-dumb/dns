@@ -17,7 +17,10 @@ if(!server.adminPass){
     });
 }
 
-https.createServer({ key: fs.readFileSync('keys/priv.key'), cert: fs.readFileSync('keys/cert.key') }, onRequest).listen(80);
+https.createServer({
+    key: fs.readFileSync('keys/priv.key'),
+    cert: fs.readFileSync('keys/cert.key')
+}, onRequest).listen(80);
 
 function getLogs(user, callback){
     fs.readFile('./data/logs/'+user+'.txt', 'utf8', function(err, data){
@@ -45,18 +48,10 @@ async function onRequest(req, res){
     let hours = date_ob.getHours();
     let minutes = date_ob.getMinutes();
     let seconds = date_ob.getSeconds();
-
-    fs.readFile('./data/logs.txt', 'utf8', function(err, data){
-        if(err)return;
-
-        let log = '['+date + "-" + month + "-" + year + " " + hours + ":" + minutes + ":" + seconds+'] INFO ' + ip2 + ' visited '  + req.headers.host + url + '\n'
-
-        fs.writeFile("./data/logs.txt", data + log, (err) => {
-            if(err)return console.log(err);
-        });
-    });    
+    let log = '['+date + "-" + month + "-" + year + " " + hours + ":" + minutes + ":" + seconds+'] INFO ' + ip2 + ' visited '  + req.headers.host + url + '\n'
 
     proxy(req, res)
+    fs.appendFileSync('./data/logs.txt', log);
 }
 
 async function proxy(client_req, client_res) {
@@ -83,15 +78,8 @@ async function proxy(client_req, client_res) {
         client_res.writeHead(200, {'Content-Type': 'text/html'});
         client_res.end(fs.readFileSync('templates/404.html'));
     } else{
-        fs.readFile('./data/logs/'+domain.user+'.txt', 'utf8', function(err, data){
-            if(err)return;
-    
-            let log = '['+date + "-" + month + "-" + year + " " + hours + ":" + minutes + ":" + seconds+'] INFO ' + ip2 + ' visited '  + client_req.headers.host + client_req.url + '\n'
-    
-            fs.writeFile('./data/logs/'+domain.user+'.txt', data + log, (err) => {
-                if(err)return console.log(err);
-            });
-        });
+        let log = '['+date + "-" + month + "-" + year + " " + hours + ":" + minutes + ":" + seconds+'] INFO ' + ip2 + ' visited '  + client_req.headers.host + client_req.url + '\n'
+        fs.appendFileSync('./data/logs/'+domain.user+'.txt', log);
 
         options = {
             hostname: domain.ip,
@@ -109,25 +97,9 @@ async function proxy(client_req, client_res) {
         });
     
         proxy.on('error', function(err1){
-            fs.readFile('./data/logs.txt', 'utf8', function(err, data){
-                if(err)return;
-        
-                let log = '['+date + "-" + month + "-" + year + " " + hours + ":" + minutes + ":" + seconds+'] ERROR ' + err1 + '\n'
-        
-                fs.writeFile("./data/logs.txt", data + log, (err) => {
-                    if(err)return console.log(err);
-                });
-            }); 
-    
-            fs.readFile('./data/logs/'+domain.user+'.txt', 'utf8', function(err, data){
-                if(err)return;
-        
-                let log = '['+date + "-" + month + "-" + year + " " + hours + ":" + minutes + ":" + seconds+'] ERROR ' + err1 + '\n'
-        
-                fs.writeFile('./data/logs/'+domain.user+'.txt', data + log, (err) => {
-                    if(err)return console.log(err);
-                });
-            });
+            let log = '['+date + "-" + month + "-" + year + " " + hours + ":" + minutes + ":" + seconds+'] ERROR ' + err1 + '\n'
+            fs.appendFileSync('./data/logs.txt', log); 
+            fs.appendFileSync('./data/logs/'+domain.user+'.txt', log); 
     
             client_res.writeHead(200, {'Content-Type': 'text/html'});
             client_res.end(fs.readFileSync('templates/500.html'));
