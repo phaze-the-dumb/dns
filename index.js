@@ -31,7 +31,6 @@ function getLogs(user, callback){
 }
 
 async function onRequest(req, res){
-    console.log('Proxy Request: '+req.method+' '+req.url)
     let ip2 = ''
 
     if(req.headers['cf-connecting-ip']){
