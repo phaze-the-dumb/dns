@@ -20,7 +20,7 @@ if(!server.adminPass){
 https.createServer({
     key: fs.readFileSync('keys/priv.key'),
     cert: fs.readFileSync('keys/cert.key')
-}, onRequest).listen(80);
+}, onRequest).listen(443);
 
 function getLogs(user, callback){
     fs.readFile('./data/logs/'+user+'.txt', 'utf8', function(err, data){
