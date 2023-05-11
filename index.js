@@ -76,7 +76,7 @@ async function proxy(client_req, client_res) {
 
     let domain = domains.find(x => x.domain === client_req.headers.host)
     if(!domain){
-        client_res.writeHead(200, {'Content-Type': 'text/html'});
+        client_res.writeHead(404, {'Content-Type': 'text/html'});
         client_res.end(fs.readFileSync('templates/404.html'));
     } else{
         let log = '['+date + "-" + month + "-" + year + " " + hours + ":" + minutes + ":" + seconds+'] INFO ' + ip2 + ' visited '  + client_req.headers.host + client_req.url + '\n'
@@ -102,7 +102,7 @@ async function proxy(client_req, client_res) {
             fs.appendFileSync('./data/logs.txt', log); 
             fs.appendFileSync('./data/logs/'+domain.user+'.txt', log); 
     
-            client_res.writeHead(200, {'Content-Type': 'text/html'});
+            client_res.writeHead(500, {'Content-Type': 'text/html'});
             client_res.end(fs.readFileSync('templates/500.html'));
         })
     
